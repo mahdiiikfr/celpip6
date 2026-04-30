@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="اپلیکیشن آموزش زبان انگلیسی - Zaban Fly" />
+    <meta name="theme-color" content="#f59e0b" />
+
+    <script>
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            // User requested explicit match with the AppHeader (amber-500) color even in dark mode
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f59e0b');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f59e0b');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <style>
+      :root { --loader-bg: #f9fafb; }
+      .dark { --loader-bg: #030712; }
+      #splash-loader {
+        position: fixed;
+        inset: 0;
+        background-color: var(--loader-bg);
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #splash-loader img {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 16px;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      #splash-loader span {
+        font-family: system-ui, -apple-system, sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #f59e0b;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+    </style>
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Zaban Fly" />
+
+    <!-- Cache Busting Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Zaban Fly - Language Learning</title>
+  </head>
+  <body style="overscroll-behavior-y: none;">
+    <!--
+      We keep a very simple, lightweight initial state.
+      The actual "Splash Screen" is now a React component.
+      This div prevents a flash before React mounts, respecting the theme.
+    -->
+    <div id="splash-loader">
+      <img src="/icon.svg" alt="Zaban Fly" />
+      <span>Zaban Fly</span>
+    </div>
+
+    <div id="root"></div>
+
+    <noscript>برای استفاده از این برنامه، لطفاً جاوااسکریپت مرورگر خود را فعال کنید.</noscript>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      const APP_VERSION = 'v2.2'; // Bumped version to force cache clear
+      const storedVersion = localStorage.getItem('app_version');
+
+      if (storedVersion !== APP_VERSION) {
+        console.log('New version detected (' + APP_VERSION + '). Clearing old cache...');
+
+        // Unregister Service Workers
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(reg => {
+                console.log('Unregistering Service Worker:', reg);
+                reg.unregister();
+            });
+          });
+        }
+
+        // Clear Cache Storage
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+                console.log('Deleting cache:', name);
+                caches.delete(name);
+            });
+          });
+        }
+
+        // Force reload if it's a PWA
+        if (storedVersion) { // Only if previous version existed
+            // Optional: window.location.reload(true); // Hard reload
+        }
+
+        localStorage.setItem('app_version', APP_VERSION);
+      }
+    </script>
+  </body>
+</html>
